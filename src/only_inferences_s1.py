@@ -2,14 +2,18 @@
 # -*- coding: utf-8 -*-
 
 """
+
+2 band. trained w/ Priv3 on flood planet
+normalized inputs
+
+
 Inference-only script for Terratorch SemanticSegmentationTask checkpoints.
 - Reads all .tif/.tiff under INPUT_DIR (non-recursive by default).
 - Optionally selects specific band indices (0-based).
 - Runs on GPU if available.
 - Saves single-band uint8 GeoTIFF masks (0/1) aligned to source CRS/transform.
 
-Edit the CONFIG section below and run:
-    python infer_prithvi_seg_noargs.py
+ 
 """
 
 # =========================
