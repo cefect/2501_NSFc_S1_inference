@@ -5,12 +5,18 @@ for original version and data transfer, see `l:\05_DATA\_jobs\2501_NSFc\2025 10 
 
 
 ## Build containers
+
+using `--target deploy` for base deployment
+on top of this, we layer `--target dev` with additional tools useful for development. 
+
+### Deployment
+
 from wsl:
 ```bash
 #build the container
 #docker build -f container/Dockerfile -t cefect/s1_inference:v0 .
 
-docker build -f container/pytorch_prebuilt/Dockerfile -t cefect/s1_inference:torch_v0 .
+docker build -f container/pytorch_prebuilt/Dockerfile -t cefect/s1_inference:v0d --target deploy .
 
  
 
@@ -31,8 +37,12 @@ docker compose -f container/pytorch_prebuilt/docker-compose.yml \
 # #test the head bash script from within the container
 # bash 
 ```
+## Dev
 
-## explore containers
+using `./container/pytorch_prebuild/docker-compose.yml` to assemble the dev container. 
+This should connect nicely to VS Code's Dev Containers (`/.devcontainer/devcontainer.json`)
+
+### explore containers
 ```bash
 
 docker run -it --rm --gpus all cefect/s1_inference:torch_v0 /bin/bash

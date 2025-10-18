@@ -1,10 +1,12 @@
+name: VSCode_Dev_Container_s1_inference
 services:
   base:
-    #image: cefect/s1_inference:torch_v0
+    image: cefect/s1_inference:dev
     build:
       context: .
       dockerfile: Dockerfile
       target: dev
+
     volumes:
       - /home/cefect/LS/09_REPOS/02_JOBS/2501_NSFc_S1_inference:/workspace:cached
       - /home/cefect/LS/10_IO/2501_NSFc/s1_infer:/s1_infer:delegated
