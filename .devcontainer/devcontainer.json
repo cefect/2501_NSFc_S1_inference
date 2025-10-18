@@ -1,0 +1,27 @@
+{
+  "name": "s1_infer_torch",
+  "dockerComposeFile": "../container/pytorch_prebuilt/docker-compose.yml",
+  "service": "base",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+  //"postAttachCommand": "bash -lc 'if [ -f /opt/conda/etc/profile.d/conda.sh ]; then \\\n    tag=\"## <devcontainer conda auto-activate>\"; \\\n    grep -q \"$tag\" ~/.bashrc || { \\\n      echo \"$tag\" >> ~/.bashrc; \\\n      echo \". /opt/conda/etc/profile.d/conda.sh\" >> ~/.bashrc; \\\n      echo \"conda activate CONDANAME\" >> ~/.bashrc; \\\n      echo \"## </devcontainer conda auto-activate>\" >> ~/.bashrc; \\\n    }; \\\n  fi'",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "github.copilot",
+        "github.copilot-chat",
+        "ms-azuretools.vscode-containers",
+        "ms-azuretools.vscode-docker",
+        "ms-python.debugpy",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.vscode-python-envs",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.datawrangler",
+        "vict0rsch.coblock",
+        "hbenl.vscode-test-explorer",
+        "littlefoxteam.vscode-python-test-adapter",
+        "htcondor.htcondor"
+
+      ],}}
+}

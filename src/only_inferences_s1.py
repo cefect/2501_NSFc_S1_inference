@@ -3,6 +3,8 @@
 
 """
 
+working.. but no GPU
+
 2 band. trained w/ Priv3 on flood planet
 normalized inputs
 
@@ -19,9 +21,9 @@ Inference-only script for Terratorch SemanticSegmentationTask checkpoints.
 # =========================
 # CONFIG (edit these only)
 # =========================
-INPUT_DIR   = "/media/turtle-ssd/users/skaushik/Sentinel1/Prithvi/cambodia/cambodia/images/test"
-CKPT_PATH   = "/media/turtle-ssd/users/skaushik/Sentinel1/inferece_test_spain/epoch-13-val_f1-0.0000.ckpt"
-OUTPUT_DIR  = "/media/turtle-ssd/users/skaushik/Sentinel1/inferece_test_spain/preds"
+INPUT_DIR   = "/s1_infer/Example_img"
+CKPT_PATH   = "/s1_infer/epoch-13-val_f1-0.0000.ckpt"
+OUTPUT_DIR  = "/s1_infer/out"
 
 BAND_INDICES   = [0, 1]   # set to None to use all bands; 0-based (e.g., [0,1,2,3,4,5])
 BATCH_SIZE     = 4        # images per batch
@@ -31,13 +33,20 @@ OUTPUT_COMPRESS = "LZW"   # GeoTIFF compression: "LZW", "DEFLATE", etc.
 
 # Force specific GPU before importing torch/lightning
 import os
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"  # change if needed
+
+#silence albumentations logging. 
+import logging
+logging.getLogger("albumentations").setLevel(logging.WARNING)
+
+#move onto container
+# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "3"  # change if needed
 
 # =========================
 # Imports
 # =========================
 import glob
+import time
 from typing import List, Optional
 
 import numpy as np
@@ -103,6 +112,8 @@ def save_mask_like(ref_path: str, mask: np.ndarray, out_path: str, compress: str
 # Main
 # =========================
 def main():
+    start_time = time.time()
+    
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -161,6 +172,10 @@ def main():
             print(f"[OK] Saved: {out_path}")
 
     print(f"[DONE] Predictions saved to: {OUTPUT_DIR}")
+    
+    end_time = time.time()
+    total_runtime = end_time - start_time
+    print(f"[RUNTIME] Total execution time: {total_runtime:.2f} seconds")
 
 
 if __name__ == "__main__":

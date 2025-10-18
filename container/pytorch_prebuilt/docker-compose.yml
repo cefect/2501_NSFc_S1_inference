@@ -1,0 +1,28 @@
+services:
+  base:
+    #image: cefect/s1_inference:torch_v0
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - /home/cefect/LS/09_REPOS/02_JOBS/2501_NSFc_S1_inference:/workspace:cached
+      - /home/cefect/LS/10_IO/2501_NSFc/s1_infer:/s1_infer:delegated
+    working_dir: /workspace
+    tty: true
+    stdin_open: true
+
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: 'nvidia'
+              count: all           
+              capabilities: [gpu]
+
+    environment:
+      - CUDA_DEVICE_ORDER=PCI_BUS_ID
+      - CUDA_VISIBLE_DEVICES=0     
+
+    command: /bin/sh -c "while sleep 1000; do :; done"
