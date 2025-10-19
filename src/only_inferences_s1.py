@@ -22,7 +22,8 @@ Inference-only script for Terratorch SemanticSegmentationTask checkpoints.
 # CONFIG (edit these only)
 # =========================
 INPUT_DIR   = "/s1_infer/Example_img"
-CKPT_PATH   = "/s1_infer/epoch-13-val_f1-0.0000.ckpt"
+#CKPT_PATH   = "/s1_infer/epoch-13-val_f1-0.0000.ckpt"
+CKPT_PATH   = "/s1_infer/epoch-13-val_f1-0.0000_weights.ckpt"
 OUTPUT_DIR  = "/s1_infer/out"
 
 BAND_INDICES   = [0, 1]   # set to None to use all bands; 0-based (e.g., [0,1,2,3,4,5])
@@ -53,6 +54,7 @@ import numpy as np
 import torch
 import rasterio
 from terratorch.tasks import SemanticSegmentationTask
+from tqdm import tqdm
 
 
 # =========================
@@ -111,7 +113,7 @@ def save_mask_like(ref_path: str, mask: np.ndarray, out_path: str, compress: str
 # =========================
 # Main
 # =========================
-def main():
+def main(overwrite=True):
     start_time = time.time()
     
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -121,7 +123,12 @@ def main():
 
     print(f"[INFO] Loading checkpoint: {CKPT_PATH}")
     # If your ckpt doesn't contain hparams, you can pass model_args=... and model_factory=...
-    model = SemanticSegmentationTask.load_from_checkpoint(CKPT_PATH)
+    #model = SemanticSegmentationTask.load_from_checkpoint(CKPT_PATH)
+    model = SemanticSegmentationTask.load_from_checkpoint(
+            CKPT_PATH,
+            map_location="cpu",   # see “hand to GPU?” below
+            strict=False           # or False if you changed model keys
+        )
     model.eval().to(device)
 
     img_paths = list_tifs(INPUT_DIR)
@@ -160,7 +167,7 @@ def main():
             preds = torch.argmax(logits, dim=1)  # (B,H,W)
 
         preds = preds.detach().cpu()
-        for i, p in enumerate(batch_paths):
+        for i, p in enumerate(tqdm(batch_paths, desc="Saving masks")):
             pred_i = preds[i]
             H, W = shapes[i]
             if (pred_i.shape[-2], pred_i.shape[-1]) != (H, W):
@@ -168,6 +175,12 @@ def main():
 
             base = os.path.basename(p)
             out_path = os.path.join(OUTPUT_DIR, base)  # same name, different folder
+
+            if overwrite and os.path.exists(out_path):
+                os.remove(out_path)
+
+
+
             save_mask_like(p, pred_i.numpy(), out_path, compress=OUTPUT_COMPRESS)
             print(f"[OK] Saved: {out_path}")
 

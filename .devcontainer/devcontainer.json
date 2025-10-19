@@ -1,6 +1,6 @@
 {
   "name": "s1_infer_torch",
-  "dockerComposeFile": "../container/pytorch_prebuilt/docker-compose.yml",
+  "dockerComposeFile": "docker-compose.yml",
   "service": "base",
   "workspaceFolder": "/workspace",
   "shutdownAction": "stopCompose",

@@ -1,10 +1,10 @@
-name: VSCode_Dev_Container_s1_inference
+name: VSCode_s1-infer_terratorch_dev
 services:
   base:
-    image: cefect/s1_inference:dev
+    image: cefect/pytorch-2.6.0-cuda12.4_terratorch:dev
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ../container/Dockerfile
       target: dev
 
     volumes:

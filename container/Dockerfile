@@ -22,11 +22,10 @@ SHELL ["/bin/bash","-lc"]
 # RUN conda env create -n conda_env -f /tmp/environment.yml \
 #  && conda clean -afy
 
-# RUN conda env update -n base -f /tmp/environment.yml && conda clean -afy
 
 
 
-#simple install of pytorch layered ontop of conda env (pulls rasterio)
+#simple install of pytorch layered ontop of conda env
 #RUN python -m pip install --no-cache-dir --no-deps terratorch
 RUN python -m pip install --no-cache-dir terratorch rasterio
 
