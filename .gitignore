@@ -36,5 +36,8 @@ venv.bak/
 
 #windows shortcuts
 *.lnk
-*/scratch_output.txt
 
+*scratch*
+
+docker_stderror
+docker_stdout
