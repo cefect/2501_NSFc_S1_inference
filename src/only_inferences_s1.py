@@ -21,10 +21,7 @@ Inference-only script for Terratorch SemanticSegmentationTask checkpoints.
 # =========================
 # CONFIG (edit these only)
 # =========================
-INPUT_DIR   = "/s1_infer/Example_img"
-#CKPT_PATH   = "/s1_infer/epoch-13-val_f1-0.0000.ckpt"
-CKPT_PATH   = "/s1_infer/epoch-13-val_f1-0.0000_weights.ckpt"
-OUTPUT_DIR  = "/s1_infer/out"
+# INPUT_DIR, CKPT_PATH, and OUTPUT_DIR are now passed as arguments to main()
 
 BAND_INDICES   = [0, 1]   # set to None to use all bands; 0-based (e.g., [0,1,2,3,4,5])
 BATCH_SIZE     = 4        # images per batch
@@ -46,6 +43,7 @@ logging.getLogger("albumentations").setLevel(logging.WARNING)
 # =========================
 # Imports
 # =========================
+import argparse
 import glob
 import time
 from typing import List, Optional
@@ -113,27 +111,27 @@ def save_mask_like(ref_path: str, mask: np.ndarray, out_path: str, compress: str
 # =========================
 # Main
 # =========================
-def main(overwrite=True):
+def main(input_dir: str, ckpt_path: str, output_dir: str, overwrite=True):
     start_time = time.time()
     
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"[INFO] Device: {device}")
 
-    print(f"[INFO] Loading checkpoint: {CKPT_PATH}")
+    print(f"[INFO] Loading checkpoint: {ckpt_path}")
     # If your ckpt doesn't contain hparams, you can pass model_args=... and model_factory=...
-    #model = SemanticSegmentationTask.load_from_checkpoint(CKPT_PATH)
+    #model = SemanticSegmentationTask.load_from_checkpoint(ckpt_path)
     model = SemanticSegmentationTask.load_from_checkpoint(
-            CKPT_PATH,
+            ckpt_path,
             map_location="cpu",   # see “hand to GPU?” below
             strict=False           # or False if you changed model keys
         )
     model.eval().to(device)
 
-    img_paths = list_tifs(INPUT_DIR)
+    img_paths = list_tifs(input_dir)
     if not img_paths:
-        raise FileNotFoundError(f"No .tif/.tiff files found under {INPUT_DIR}")
+        raise FileNotFoundError(f"No .tif/.tiff files found under {input_dir}")
 
     print(f"[INFO] Found {len(img_paths)} images.")
     bs = max(1, int(BATCH_SIZE))
@@ -174,7 +172,7 @@ def main(overwrite=True):
                 pred_i = unpad_to_size(pred_i, H, W)
 
             base = os.path.basename(p)
-            out_path = os.path.join(OUTPUT_DIR, base)  # same name, different folder
+            out_path = os.path.join(output_dir, base)  # same name, different folder
 
             if overwrite and os.path.exists(out_path):
                 os.remove(out_path)
@@ -184,7 +182,7 @@ def main(overwrite=True):
             save_mask_like(p, pred_i.numpy(), out_path, compress=OUTPUT_COMPRESS)
             print(f"[OK] Saved: {out_path}")
 
-    print(f"[DONE] Predictions saved to: {OUTPUT_DIR}")
+    print(f"[DONE] Predictions saved to: {output_dir}")
     
     end_time = time.time()
     total_runtime = end_time - start_time
@@ -192,4 +190,12 @@ def main(overwrite=True):
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Inference script for Terratorch SemanticSegmentationTask checkpoints")
+    parser.add_argument("input_dir", help="Directory containing input .tif/.tiff files")
+    parser.add_argument("ckpt_path", help="Path to the checkpoint file")
+    parser.add_argument("output_dir", help="Directory to save output masks")
+    #parser.add_argument("--overwrite", action="store_true", default=True, help="Overwrite existing output files")
+    
+    args = parser.parse_args()
+    
+    main(args.input_dir, args.ckpt_path, args.output_dir)

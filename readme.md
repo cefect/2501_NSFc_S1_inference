@@ -40,11 +40,19 @@ use Dev Container plugin w/ `/.devcontainer/devcontainer.json` to build via `doc
 
 ### running and managing jobs
 - login via VPN and SSH
- 
+
+#### prep data
+```bash
+
+#tarball the inputs
+cd /mnt/htc-cephfs/fuse/root/staging/sbryant8/2501_NSFc
+tar -czf s1_infer.tar.gz -C . s1_infer
+
+
 ```bash
 #submit the job
 cd /home/sbryant8/LS/09_REPOS/2501_NSFc_S1_inference
-condor_submit htcondor/infer.sub
+condor_submit htcondor/test.sub
  
  
 #watch the que

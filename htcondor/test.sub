@@ -7,7 +7,7 @@ container_image = docker://cefect/pytorch-2.6.0-cuda12.4_terratorch:v0
  
 
 # Your job's launcher script (transferred and executed inside the container)
-executable      = src/run.sh
+executable      = htcondor/run_test.sh
 
 # If main.py needs args, add them here; they reach run.sh as "$@"
 #arguments  = data/array.txt result.$(Cluster).$(Process).txt

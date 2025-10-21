@@ -1,0 +1,55 @@
+# inference submit file
+
+OUTDIR = /output
+
+#set the image
+universe = container
+container_image = docker://cefect/pytorch-2.6.0-cuda12.4_terratorch:v0
+ 
+
+# Your job's launcher script (transferred and executed inside the container)
+executable      = htcondor/run.sh
+
+# We will pass *relative* paths that exist in the job's working directory
+# after HTCondor unpacks the staged tarball (see transfer_input_files below).
+#    args: input_dir             ckpt_path                                          output_dir
+arguments       = s1_infer/Example_img s1_infer/epoch-13-val_f1-0.0000_weights.ckpt $(OUTDIR)
+
+
+# --- file transfer (required for Docker/containers) ---
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+preserve_relative_paths = True
+
+# Ship your code AND pull the staged data tarball (auto-unpack into s1_infer/)
+transfer_input_files = src, \
+    osdf:///chtc/staging/sbryant8/LS/10_IO/2501_NSFc/s1_infer/input_s1_tiles.tar.gz?pack=auto, \
+    osdf:///chtc/staging/sbryant8/LS/10_IO/2501_NSFc/s1_infer/epoch-13-val_f1-0.0000_weights.ckpt
+
+
+
+# Explicitly pull back the program output (top-level file)
+transfer_output_files = $(OUTDIR)
+output_destination = /home/sbryant8/LS/10_IO/2501_NSFc/output/$(SUBMIT_TIME)
+
+# --- logs on the SUBMIT node (your /home) ---
+output = htcondor/logs/$(Cluster).$(Process).$(SUBMIT_TIME).out
+error  = htcondor/logs/$(Cluster).$(Process).$(SUBMIT_TIME).err
+log    = htcondor/logs/$(Cluster).$(SUBMIT_TIME).log
+
+# Resources (tune as needed)
+request_cpus   = 1
+request_memory = 4GB
+request_disk   = 4GB
+
+# GPU
+request_gpus = 1
+#gpus_minimum_capability = 7.5
+gpus_minimum_runtime = 12.4
+#mininum quantity of GPU memory in MiB
+gpus_minimum_memory = 4096 
++WantGPULab = true
++GPUJobLength = "short"
+
+ 
+queue

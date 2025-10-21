@@ -44,6 +44,7 @@ echo "Running "
 
 #requires preserve_relative_paths = True
 #-u force the stdout and stderr streams to be unbuffered
+#python -u src/torch_setup.py
 python -u src/torch_setup.py
 
 echo "Done"
