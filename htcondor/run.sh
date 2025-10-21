@@ -10,6 +10,8 @@ INPUT_DIR="$1"
 CKPT_PATH="$2"
 OUTPUT_DIR="$3"
  
+# Create output directory if it doesn't exist
+mkdir -p "$OUTPUT_DIR"
 
 echo "[INFO] Running in: $PWD"
 #echo "[INFO] Args: input_dir='$INPUT_DIR' ckpt_path='$CKPT_PATH' output_dir='$OUTPUT_DIR' "
@@ -22,6 +24,7 @@ echo "Conda environment activated"
 
 # ---- Run your program ----
 echo "Running inference script with arguments..."
-python -u src/only_inferences_s1.py \"$INPUT_DIR\" \"$CKPT_PATH\" \"$OUTPUT_DIR\"
+python -u src/only_inferences_s1.py "$INPUT_DIR" "$CKPT_PATH" "$OUTPUT_DIR"
+
 
 echo "Done"

@@ -44,15 +44,15 @@ use Dev Container plugin w/ `/.devcontainer/devcontainer.json` to build via `doc
 #### prep data
 ```bash
 
-#tarball the inputs
-cd /mnt/htc-cephfs/fuse/root/staging/sbryant8/2501_NSFc
-tar -czf s1_infer.tar.gz -C . s1_infer
+#tarball the input images
+tar -czf input_s1_tiles -C . Example_img
+#NOTE: no value in tarballing the large checkpoint file
 
 
 ```bash
 #submit the job
 cd /home/sbryant8/LS/09_REPOS/2501_NSFc_S1_inference
-condor_submit htcondor/test.sub
+condor_submit htcondor/run.sub
  
  
 #watch the que
