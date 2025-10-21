@@ -7,10 +7,17 @@ import torch.nn.functional as F
 import rasterio
 from rasterio.windows import Window
 from terratorch.tasks import SemanticSegmentationTask
-from tqdm import tqdm
+import tqdm
+import sys
 
 
 print('start')
+
+print(f"Python version: {sys.version}")
+print(f"PyTorch version: {torch.__version__}")
+print(f"NumPy version: {np.__version__}")
+print(f"Rasterio version: {rasterio.__version__}")
+print(f"tqdm version: {tqdm.__version__}")
 
 if torch.cuda.is_available():
     print("CUDA is available.")
