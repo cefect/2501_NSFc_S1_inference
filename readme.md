@@ -1,7 +1,28 @@
-# small project for replicating Saurabh's S1 inference
+# small project for replicating Saurabh's S1 inference on HTC
+
+
 
 for original version and data transfer, see `l:\05_DATA\_jobs\2501_NSFc\2025 10 03 - Sarubah - S1 inference\readme.md`
 
+## Input data
+Requires the sample S1 tiles and lightning checkpoint file provided [here](https://drive.google.com/drive/folders/1oKlLTJPTMpdsd-lasMQc5-YnOs3c0G-i?usp=sharing):
+- Example_img\
+- epoch-13-val_f1-0.0000_weights.ckpt
+
+
+## Structure
+favouring a modular strategy for improved clarity, re-usability, and testing (vs. monolithic) 
+
+```css
+run.sub → run.sh → src/main.py → src/only_inferences_s1.py
+
+```
+- **run.sub** submits the job. HTCondor submit file. 
+- **run.sh**: configures the shell (conda, variables) and calls the main.py
+- **main.py**: python CLI endpoint. digests arguments and sets up python, configures the logging, calls the function
+- **only_inferences_s1.py**: source code containing the actual function we run
+
+ 
 
 
 ## Build containers --------
@@ -26,7 +47,7 @@ docker run -it --rm --gpus all \
   bash -lc "python /workspace/src/torch_setup.py"
  
 ```
-### Dev
+### Development
 use Dev Container plugin w/ `/.devcontainer/devcontainer.json` to build via `docker-compase.yml`
 
 
@@ -41,9 +62,8 @@ use Dev Container plugin w/ `/.devcontainer/devcontainer.json` to build via `doc
 ### running and managing jobs
 - login via VPN and SSH
 
-
-
-#### prep data
+#### prep 
+- copy over input files (to your staging)
 ```bash
 #check your quota
 get_quotas /staging/sbryant8
@@ -55,13 +75,27 @@ cd /mnt/htc-cephfs/fuse/root/staging/sbryant8/2501_NSFc/s1_infer
 tar -czf Example_img ?
 ```
 
-#### Submit and Monitor
+- update `htcondor/run.sub` to reflect your paths
+
+#### Submit 
+
 ```bash
 #submit the job
 cd /home/sbryant8/LS/09_REPOS/2501_NSFc_S1_inference
 condor_submit htcondor/run.sub && condor_watch_q
- 
- 
+```
+
+If successful, this should output flood segmentation masks (.tifs) to `$(STAGING_DIR)/output/`.
+Various log files should also be generated:
+- $(STAGING_DIR)/output/: python debug logger
+- $(LOG_BASE).out: STDOUT (run.sh and python logging >= INFO)
+- $(LOG_BASE).err: STDERR (run.sh and python logging >= ERROR)
+- $(LOG_BASE).htc-log: HTCondor scheduler out
+
+
+
+#### Monitor
+```bash
 #watch the que
 condor_watch_q 
 
@@ -69,7 +103,6 @@ condor_watch_q
 condor_q -hold
 
 #cancel jobs
-condor_rm <id>
 condor_rm -all
 
 #look at some old jobs
