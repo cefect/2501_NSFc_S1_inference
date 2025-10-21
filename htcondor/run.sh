@@ -26,23 +26,23 @@ echo "Conda environment activated"
 
 #Set by CONDOR:
 #CUBACORES GOMAXPROCS JULIA_NUM_THREADS MKL_NUM_THREADS NUMEXPR_NUM_THREADS OMP_NUM_THREADS OMP_THREAD_LIMIT OPENBLAS_NUM_THREADS PYTHON_CPU_COUNT ROOT_MAX_THREADS TF_LOOP_PARALLEL_ITERATIONS TF_NUM_THREADS
-echo "[INFO] Thread/CPU environment variables:"
-echo "CUBACORES: ${CUBACORES:-unset}"
-echo "GOMAXPROCS: ${GOMAXPROCS:-unset}"
-echo "JULIA_NUM_THREADS: ${JULIA_NUM_THREADS:-unset}"
-echo "MKL_NUM_THREADS: ${MKL_NUM_THREADS:-unset}"
-echo "NUMEXPR_NUM_THREADS: ${NUMEXPR_NUM_THREADS:-unset}"
-echo "OMP_NUM_THREADS: ${OMP_NUM_THREADS:-unset}"
-echo "OMP_THREAD_LIMIT: ${OMP_THREAD_LIMIT:-unset}"
-echo "OPENBLAS_NUM_THREADS: ${OPENBLAS_NUM_THREADS:-unset}"
-echo "PYTHON_CPU_COUNT: ${PYTHON_CPU_COUNT:-unset}"
-echo "ROOT_MAX_THREADS: ${ROOT_MAX_THREADS:-unset}"
-echo "TF_LOOP_PARALLEL_ITERATIONS: ${TF_LOOP_PARALLEL_ITERATIONS:-unset}"
-echo "TF_NUM_THREADS: ${TF_NUM_THREADS:-unset}"
+# echo "[INFO] Thread/CPU environment variables:"
+# echo "CUBACORES: ${CUBACORES:-unset}"
+# echo "GOMAXPROCS: ${GOMAXPROCS:-unset}"
+# echo "JULIA_NUM_THREADS: ${JULIA_NUM_THREADS:-unset}"
+# echo "MKL_NUM_THREADS: ${MKL_NUM_THREADS:-unset}"
+# echo "NUMEXPR_NUM_THREADS: ${NUMEXPR_NUM_THREADS:-unset}"
+# echo "OMP_NUM_THREADS: ${OMP_NUM_THREADS:-unset}"
+# echo "OMP_THREAD_LIMIT: ${OMP_THREAD_LIMIT:-unset}"
+# echo "OPENBLAS_NUM_THREADS: ${OPENBLAS_NUM_THREADS:-unset}"
+# echo "PYTHON_CPU_COUNT: ${PYTHON_CPU_COUNT:-unset}"
+# echo "ROOT_MAX_THREADS: ${ROOT_MAX_THREADS:-unset}"
+# echo "TF_LOOP_PARALLEL_ITERATIONS: ${TF_LOOP_PARALLEL_ITERATIONS:-unset}"
+# echo "TF_NUM_THREADS: ${TF_NUM_THREADS:-unset}"
 
-#GPU related
-echo "CUDA_VISIBLE_DEVICES: ${CUDA_VISIBLE_DEVICES:-unset}"
-echo "NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-unset}"
+# #GPU related
+# echo "CUDA_VISIBLE_DEVICES: ${CUDA_VISIBLE_DEVICES:-unset}"
+# echo "NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-unset}"
 
 
 
@@ -51,15 +51,20 @@ export PROGRESS=0           # our script will read this to disable tqdm
 export LOGLEVEL=INFO     # our script will read this for logging level
 export LOGFILE=$OUTPUT_DIR/main.log  # our script will read this for logging file
 export PYTHONWARNINGS=ignore
-export PYTHONOPTIMIZE=1
+export PYTHONOPTIMIZE=1 #skips assertions and some docstrings
 
 # Optional: small GDAL cache for many concurrent jobs (MB)
 export GDAL_CACHEMAX=256
 
+ 
+
+#TEST 
+test -f src/__init__.py || { echo "src/__init__.py missing"; exit 1; }
+
 
 # ---- Run your program ----
 echo "Running inference script with arguments..."
-python -O src/main.py "$INPUT_DIR" "$CKPT_PATH" "$OUTPUT_DIR"
+python -m src.main "$INPUT_DIR" "$CKPT_PATH" "$OUTPUT_DIR"
 
 
 echo "Done"

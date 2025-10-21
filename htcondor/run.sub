@@ -2,7 +2,8 @@
 
 STAGING_DIR = staging/sbryant8/2501_NSFc/s1_infer/
 INPUT_DIR = Example_img
-OUTDIR = $(SUBMIT_TIME)_out
+JOBID_BASE = $(Cluster)_$(SUBMIT_TIME)
+OUTDIR = $(JOBID_BASE)_out
 CKPT_PATH = epoch-13-val_f1-0.0000_weights.ckpt
 
 
@@ -42,11 +43,17 @@ transfer_output_files = $(OUTDIR)
 output_destination = osdf:///chtc/$(STAGING_DIR)/output/
 
 # --- logs on the SUBMIT node (your /home) ---
-output = htcondor/logs/$(Cluster).$(Process).$(SUBMIT_TIME).out
-error  = htcondor/logs/$(Cluster).$(Process).$(SUBMIT_TIME).err
+LOG_BASE = htcondor/logs/$(JOBID_BASE)
 
-#htc logging
-log    = htcondor/logs/$(Cluster).$(SUBMIT_TIME).htc-log #
+output = $(LOG_BASE).out
+error  = $(LOG_BASE).err
+log    = $(LOG_BASE).htc-log
+
+stream_output = False
+stream_error  = False
+
+ 
+
 
 # Resources (tune as needed)
 request_cpus   = 1
