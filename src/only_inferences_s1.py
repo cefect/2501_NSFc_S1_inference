@@ -29,16 +29,40 @@ FLOAT_SCALE    = None     # e.g., 10000.0 if you need to divide inputs by a scal
 TILE_DIVISIBLE = 1        # pad H,W to nearest multiple (e.g., 32) for some decoders; 1 = no pad
 OUTPUT_COMPRESS = "LZW"   # GeoTIFF compression: "LZW", "DEFLATE", etc.
 
-# Force specific GPU before importing torch/lightning
-import os
+ 
 
-#silence albumentations logging. 
-import logging
+
+# ---- Logging / verbosity control
+import os, logging 
+from src.logr import get_new_file_logger
+
+LOGLEVEL = os.environ.get("LOGLEVEL", "DEBUG").upper()
+LOGFILE = os.environ.get("LOGFILE", "job.log")
+log = get_new_file_logger(
+    logger_name="s1_infer",
+    level = getattr(logging, LOGLEVEL, logging.INFO),
+    fp=LOGFILE,
+)
+
+# Quiet common third-party noise; raise if you want it
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("botocore").setLevel(logging.WARNING)
+logging.getLogger("rasterio").setLevel(logging.INFO)
 logging.getLogger("albumentations").setLevel(logging.WARNING)
+
+#add a console logger too
+if __debug__:
+    from src.logr import get_new_console_logger
+    log = get_new_console_logger(
+        level=getattr(logging, LOGLEVEL, logging.INFO),
+        logger=log)
 
 #move onto container
 # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 # os.environ["CUDA_VISIBLE_DEVICES"] = "3"  # change if needed
+
+
+
 
 # =========================
 # Imports
@@ -54,6 +78,19 @@ import rasterio
 from terratorch.tasks import SemanticSegmentationTask
 from tqdm import tqdm
 
+
+
+
+#HTC config
+# Detect HTC job (CONDOR sets these)
+ON_HTC = ("CONDOR_JOB_ID" in os.environ) or ("_CONDOR_SCRATCH_DIR" in os.environ)
+
+# Disable heavy console decorations by default on HTC
+PROGRESS = os.environ.get("PROGRESS", "1" if not ON_HTC else "0") == "1"
+
+
+#TORCH config
+torch.backends.cudnn.benchmark = True
 
 # =========================
 # Helpers
@@ -117,9 +154,9 @@ def main(input_dir: str, ckpt_path: str, output_dir: str, overwrite=True):
     os.makedirs(output_dir, exist_ok=True)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"[INFO] Device: {device}")
+    log.info(f"Device: {device}")
 
-    print(f"[INFO] Loading checkpoint: {ckpt_path}")
+    log.info(f"Loading checkpoint: {ckpt_path}")
     # If your ckpt doesn't contain hparams, you can pass model_args=... and model_factory=...
     #model = SemanticSegmentationTask.load_from_checkpoint(ckpt_path)
     model = SemanticSegmentationTask.load_from_checkpoint(
@@ -133,7 +170,7 @@ def main(input_dir: str, ckpt_path: str, output_dir: str, overwrite=True):
     if not img_paths:
         raise FileNotFoundError(f"No .tif/.tiff files found under {input_dir}")
 
-    print(f"[INFO] Found {len(img_paths)} images.")
+    log.info(f"Found {len(img_paths)} images.")
     bs = max(1, int(BATCH_SIZE))
 
     for start in range(0, len(img_paths), bs):
@@ -165,7 +202,7 @@ def main(input_dir: str, ckpt_path: str, output_dir: str, overwrite=True):
             preds = torch.argmax(logits, dim=1)  # (B,H,W)
 
         preds = preds.detach().cpu()
-        for i, p in enumerate(tqdm(batch_paths, desc="Saving masks")):
+        for i, p in enumerate(tqdm(batch_paths, desc="Saving masks", disable = not PROGRESS)):
             pred_i = preds[i]
             H, W = shapes[i]
             if (pred_i.shape[-2], pred_i.shape[-1]) != (H, W):
@@ -180,13 +217,13 @@ def main(input_dir: str, ckpt_path: str, output_dir: str, overwrite=True):
 
 
             save_mask_like(p, pred_i.numpy(), out_path, compress=OUTPUT_COMPRESS)
-            print(f"[OK] Saved: {out_path}")
+            log.info(f"Saved: {out_path}")
 
-    print(f"[DONE] Predictions saved to: {output_dir}")
+    log.info(f"Predictions saved to: {output_dir}")
     
     end_time = time.time()
     total_runtime = end_time - start_time
-    print(f"[RUNTIME] Total execution time: {total_runtime:.2f} seconds")
+    log.info(f"Total execution time: {total_runtime:.2f} seconds")
 
 
 if __name__ == "__main__":

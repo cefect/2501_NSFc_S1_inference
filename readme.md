@@ -41,18 +41,25 @@ use Dev Container plugin w/ `/.devcontainer/devcontainer.json` to build via `doc
 ### running and managing jobs
 - login via VPN and SSH
 
+
+
 #### prep data
 ```bash
+#check your quota
+get_quotas /staging/sbryant8
 
 #tarball the input images
-tar -czf input_s1_tiles -C . Example_img
 #NOTE: no value in tarballing the large checkpoint file
+#NOTE: be sure the tarball unpacks in a predictable way
+cd /mnt/htc-cephfs/fuse/root/staging/sbryant8/2501_NSFc/s1_infer
+tar -czf Example_img ?
+```
 
-
+#### Submit and Monitor
 ```bash
 #submit the job
 cd /home/sbryant8/LS/09_REPOS/2501_NSFc_S1_inference
-condor_submit htcondor/run.sub
+condor_submit htcondor/run.sub && condor_watch_q
  
  
 #watch the que
@@ -67,10 +74,13 @@ condor_rm -all
 
 #look at some old jobs
 condor_history -constraint 'Owner == "sbryant8"' -limit 5
+```
 
+#### Tune
+```bash
 #TUNE: investigate the resources of an old job
 #OPT1: just open the log file
-#OPT2
+#OPT2: 
 condor_history 4543341.0 \
   -format "JobID: %d.%d  " ClusterId ProcId \
   -format "Memory: %d MB  " MemoryUsage \
