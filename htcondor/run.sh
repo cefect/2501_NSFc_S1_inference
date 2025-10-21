@@ -49,7 +49,7 @@ echo "NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-unset}"
 # Quiet/lean defaults on cluster
 export PROGRESS=0           # our script will read this to disable tqdm
 export LOGLEVEL=INFO     # our script will read this for logging level
-export LOGFILE=$OUTPUT_DIR/only_inferences_s1.log  # our script will read this for logging file
+export LOGFILE=$OUTPUT_DIR/main.log  # our script will read this for logging file
 export PYTHONWARNINGS=ignore
 export PYTHONOPTIMIZE=1
 
@@ -59,7 +59,7 @@ export GDAL_CACHEMAX=256
 
 # ---- Run your program ----
 echo "Running inference script with arguments..."
-python -O src/only_inferences_s1.py "$INPUT_DIR" "$CKPT_PATH" "$OUTPUT_DIR"
+python -O src/main.py "$INPUT_DIR" "$CKPT_PATH" "$OUTPUT_DIR"
 
 
 echo "Done"

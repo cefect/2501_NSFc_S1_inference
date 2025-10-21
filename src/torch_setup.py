@@ -13,6 +13,8 @@ import sys
 
 print('start')
 
+print(f"PYTHONPATH: {os.environ.get('PYTHONPATH', 'Not set')}")
+
 print(f"Python version: {sys.version}")
 print(f"PyTorch version: {torch.__version__}")
 print(f"NumPy version: {np.__version__}")

@@ -32,30 +32,7 @@ OUTPUT_COMPRESS = "LZW"   # GeoTIFF compression: "LZW", "DEFLATE", etc.
  
 
 
-# ---- Logging / verbosity control
-import os, logging 
-from src.logr import get_new_file_logger
 
-LOGLEVEL = os.environ.get("LOGLEVEL", "DEBUG").upper()
-LOGFILE = os.environ.get("LOGFILE", "job.log")
-log = get_new_file_logger(
-    logger_name="s1_infer",
-    level = getattr(logging, LOGLEVEL, logging.INFO),
-    fp=LOGFILE,
-)
-
-# Quiet common third-party noise; raise if you want it
-logging.getLogger("urllib3").setLevel(logging.WARNING)
-logging.getLogger("botocore").setLevel(logging.WARNING)
-logging.getLogger("rasterio").setLevel(logging.INFO)
-logging.getLogger("albumentations").setLevel(logging.WARNING)
-
-#add a console logger too
-if __debug__:
-    from src.logr import get_new_console_logger
-    log = get_new_console_logger(
-        level=getattr(logging, LOGLEVEL, logging.INFO),
-        logger=log)
 
 #move onto container
 # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -67,9 +44,9 @@ if __debug__:
 # =========================
 # Imports
 # =========================
+
 import argparse
-import glob
-import time
+import glob, os, time 
 from typing import List, Optional
 
 import numpy as np
@@ -148,8 +125,16 @@ def save_mask_like(ref_path: str, mask: np.ndarray, out_path: str, compress: str
 # =========================
 # Main
 # =========================
-def main(input_dir: str, ckpt_path: str, output_dir: str, overwrite=True):
+def main(input_dir: str, ckpt_path: str, output_dir: str, overwrite=True, log=None):
     start_time = time.time()
+    
+    # Use print as fallback if no logger provided
+    if log is None:
+        class DummyLogger:
+            def info(self, msg): print(f"[INFO] {msg}")
+            def warning(self, msg): print(f"[WARNING] {msg}")
+            def error(self, msg): print(f"[ERROR] {msg}")
+        log = DummyLogger()
     
     os.makedirs(output_dir, exist_ok=True)
 
@@ -227,12 +212,9 @@ def main(input_dir: str, ckpt_path: str, output_dir: str, overwrite=True):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Inference script for Terratorch SemanticSegmentationTask checkpoints")
-    parser.add_argument("input_dir", help="Directory containing input .tif/.tiff files")
-    parser.add_argument("ckpt_path", help="Path to the checkpoint file")
-    parser.add_argument("output_dir", help="Directory to save output masks")
-    #parser.add_argument("--overwrite", action="store_true", default=True, help="Overwrite existing output files")
-    
-    args = parser.parse_args()
-    
-    main(args.input_dir, args.ckpt_path, args.output_dir)
+    INPUT_DIR   = "/s1_infer/Example_img"
+    CKPT_PATH   = "/s1_infer/epoch-13-val_f1-0.0000.ckpt"
+    OUTPUT_DIR  = "/s1_infer/out"
+ 
+    # Call main with the defined variables
+    main(INPUT_DIR, CKPT_PATH, OUTPUT_DIR)
