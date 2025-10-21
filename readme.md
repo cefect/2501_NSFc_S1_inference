@@ -1,3 +1,8 @@
+![Docker Image Version (latest)](https://img.shields.io/docker/v/cefect/pytorch-2.6.0-cuda12.4_terratorch?sort=semver&logo=docker)
+
+
+
+
 # small project for replicating Saurabh's S1 inference on HTC
 
 
