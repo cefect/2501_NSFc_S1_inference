@@ -2,7 +2,7 @@
 
 STAGING_DIR = staging/sbryant8/2501_NSFc/s1_infer/
 INPUT_DIR = Example_img
-OUTDIR = output
+OUTDIR = $(SUBMIT_TIME)_out
 CKPT_PATH = epoch-13-val_f1-0.0000_weights.ckpt
 
 
@@ -39,12 +39,14 @@ transfer_output_files = $(OUTDIR)
 
 #specifies both a plug-in and a destination for the transfer of the entire output sandbox or a subset of output files as specified by the submit command transfer_output_files
 #must be a plugin (not a path)
-output_destination = osdf:///chtc/$(STAGING_DIR)/output/$(SUBMIT_TIME)
+output_destination = osdf:///chtc/$(STAGING_DIR)/output/
 
 # --- logs on the SUBMIT node (your /home) ---
 output = htcondor/logs/$(Cluster).$(Process).$(SUBMIT_TIME).out
 error  = htcondor/logs/$(Cluster).$(Process).$(SUBMIT_TIME).err
-log    = htcondor/logs/$(Cluster).$(SUBMIT_TIME).log
+
+#htc logging
+log    = htcondor/logs/$(Cluster).$(SUBMIT_TIME).htc-log #
 
 # Resources (tune as needed)
 request_cpus   = 1
@@ -57,7 +59,7 @@ request_gpus = 1
 gpus_minimum_runtime = 12.4
 #mininum quantity of GPU memory in MiB
 gpus_minimum_memory = 200MB 
-+WantGPULab = true
+#+WantGPULab = true
 +GPUJobLength = "short"
 
  
