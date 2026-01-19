@@ -27,7 +27,7 @@ SHELL ["/bin/bash","-lc"]
 
 #simple install of pytorch layered ontop of conda env
 # WOrks. MUST SPECIFY terratorch==1.1 (>1.1 has issues with OpenCV)
-RUN python -m pip install --no-cache-dir --no-deps terratorch
+#RUN python -m pip install --no-cache-dir --no-deps terratorch
 RUN python -m pip install --no-cache-dir "pip==24.3.1" \
  && python -m pip install --no-cache-dir "terratorch==1.1" "rasterio==1.4.3"
 

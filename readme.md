@@ -40,7 +40,7 @@ on top of this, we layer `--target dev` with additional tools useful for develop
 from wsl:
 ```bash
 #build the container (for deployment... `dev` target is only used by Dev Container plugin)
-export IMAGE_NAME=cefect-terratorch/2.6.0-cuda12.4:base-v0.4
+export IMAGE_NAME=cefect-terratorch/2.6.0-cuda12.4:base-v0.5
 docker build -f container/Dockerfile -t $IMAGE_NAME --target base .
 ```
 
