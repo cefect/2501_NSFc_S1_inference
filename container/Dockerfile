@@ -8,7 +8,7 @@
 
 
 # Base: PyTorch + CUDA 12.4 + cuDNN 9 + Conda
-FROM pytorch/pytorch:2.6.0-cuda12.4-cudnn9-runtime AS deploy
+FROM pytorch/pytorch:2.6.0-cuda12.4-cudnn9-runtime AS base
 SHELL ["/bin/bash","-lc"]
 
 
@@ -26,8 +26,16 @@ SHELL ["/bin/bash","-lc"]
 
 
 #simple install of pytorch layered ontop of conda env
-#RUN python -m pip install --no-cache-dir --no-deps terratorch
-RUN python -m pip install --no-cache-dir terratorch rasterio
+# WOrks. MUST SPECIFY terratorch==1.1 (>1.1 has issues with OpenCV)
+RUN python -m pip install --no-cache-dir --no-deps terratorch
+RUN python -m pip install --no-cache-dir "pip==24.3.1" \
+ && python -m pip install --no-cache-dir "terratorch==1.1" "rasterio==1.4.3"
+
+# also doesnt work
+# RUN python -m pip install --no-cache-dir --upgrade pip \
+#  && python -m pip uninstall -y opencv-python opencv-contrib-python || true \
+#  && python -m pip install --no-cache-dir opencv-python-headless \
+#  && python -m pip install --no-cache-dir terratorch rasterio
 
 
 #purge
@@ -50,7 +58,7 @@ WORKDIR /workspace
 
 
 #DEV TOOLS===================================
-FROM deploy AS dev
+FROM base AS dev
 RUN apt-get update \
  && apt-get install -y --no-install-recommends git \
  && rm -rf /var/lib/apt/lists/*

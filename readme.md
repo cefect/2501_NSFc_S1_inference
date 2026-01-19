@@ -40,9 +40,27 @@ on top of this, we layer `--target dev` with additional tools useful for develop
 from wsl:
 ```bash
 #build the container (for deployment... `dev` target is only used by Dev Container plugin)
-docker build -f container/Dockerfile -t cefect/pytorch-2.6.0-cuda12.4_terratorch:v0 --target deploy .
+export IMAGE_NAME=cefect-terratorch/2.6.0-cuda12.4:base-v0.4
+docker build -f container/Dockerfile -t $IMAGE_NAME --target base .
+```
+
+check it out
+```bash
+docker run -it --rm --gpus all \
+  -v $(pwd)/src:/workspace/src \
+  $IMAGE_NAME bash
+
+python src/torch_setup.py
+```
+
+### debuging
+```bash
+export IMAGE_NAME=cefect/pytorch-2.6.0-cuda12.4_terratorch:v0
+docker pull $IMAGE_NAME
+```
 
 # push
+```bash
 docker push cefect/pytorch-2.6.0-cuda12.4_terratorch:v0 
 
 #test (locally)
